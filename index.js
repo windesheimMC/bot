@@ -17,7 +17,7 @@ const restrict = (member) => {
     member.roles.add(role);
 }
 
-client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
+client.on(Events.GuildMemberUpdate, (_, newMember) => {
     if (newMember.roles.cache.has(process.env.ONLOOKER_ROLE_ID) && !newMember.roles.cache.has(process.env.RESTRICTED_ROLE_ID)) {
         restrict(newMember);
 
