@@ -22,7 +22,7 @@ client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
         restrict(newMember);
 
         let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
-        restricted_users.push(newMember.user.id);
+        if (!(newMember.user.id in restricted_users)) restricted_users.push(newMember.user.id);
         writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
     }
 });
