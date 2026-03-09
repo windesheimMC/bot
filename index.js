@@ -60,9 +60,19 @@ const runCommand = (fullCommand) => {
 
     switch (command) {
         case "restrict":
-            // TODO: Restrict user
-            break;
-    
+            const user_exists = client.members.cache.has(args[0].replace("<@", "").replace(">", ""))
+            if (!user_exists) {
+                return "User no found!";
+            }
+            const member = client.members.cache.get(args[0].replace("<@", "").replace(">", ""))
+            
+            restrict(member);
+
+            let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
+            if (!(member.user.id in restricted_users)) restricted_users.push(member.user.id);
+            writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
+
+            return `Restriced ${member.user.globalName}`;
         default:
             return "Invalid command!"
     }
