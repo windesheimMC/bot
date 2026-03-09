@@ -20,6 +20,13 @@ const restrict = (member) => {
     member.roles.add(role);
 }
 
+const unrestrict = (member) => {
+    console.log(`Unrestricting ${member.user.globalName}`)
+    const guild = client.guilds.cache.get(process.env.GUILD_ID);
+    const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
+    member.roles.remove(role);
+}
+
 const hasRole = (member, role_id) => member.roles.cache.has(role_id);
 
 const is_exempt = (member) => {
@@ -58,10 +65,10 @@ const runCommand = (fullCommand) => {
     const command = args[0]
     args.shift()
 
+    const guild = client.guilds.cache.get(process.env.GUILD_ID);
+    const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
     switch (command) {
         case "restrict":
-            const guild = client.guilds.cache.get(process.env.GUILD_ID)
-            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""))
             if (!user_exists) {
                 return "User no found!";
             }
@@ -77,7 +84,31 @@ const runCommand = (fullCommand) => {
             if (!(member.user.id in restricted_users)) restricted_users.push(member.user.id);
             writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
 
-            return `Restriced ${member.user.globalName}!`;
+            let addional_info = ""
+            if (is_exempt(member)) {
+                // Remove exemption
+            }
+
+            return `Restriced ${member.user.globalName}!${addional_info}`;
+
+        case "exempt":
+            const guild = client.guilds.cache.get(process.env.GUILD_ID)
+            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""))
+            if (!user_exists) {
+                return "User no found!";
+            }
+            const exempt_member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""))
+
+            if (hasRole(exempt_member, process.env.RESTRICTED_ROLE_ID)) {
+                unrestrict(exempt_member);
+            }
+
+            let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
+            if (!(exempt_member.user.id in exemped_users)) restricted_users.push(member.user.id);
+            writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
+
+            return `Exempted ${member.user.globalName}!`
+            
         default:
             return "Invalid command!"
     }
