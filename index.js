@@ -86,7 +86,10 @@ const runCommand = (fullCommand) => {
 client.on(Events.MessageCreate, (content, _) => {
     const prefix = `<@${bot_id}>`
 
-    if (content.content.startsWith(prefix) && hasRole(content.author, process.env.MODERATOR_ROLE_ID)) {
+    const guild = client.guilds.cache.get(process.env.GUILD_ID)
+    const author_member = guild.members.cache.get(content.author.id)
+
+    if (content.content.startsWith(prefix) && hasRole(author_member, process.env.MODERATOR_ROLE_ID)) {
         const reply = runCommand(content.content.substring(prefix.length).trim())
         content.reply(reply)
     }
