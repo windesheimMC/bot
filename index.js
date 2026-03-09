@@ -86,7 +86,12 @@ const runCommand = (fullCommand) => {
 
             let addional_info = ""
             if (is_exempt(member)) {
-                // Remove exemption
+                let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
+                if (exempt_member.user.id in exemped_users) {
+                    const index = exemped_users.indexOf(exempt_member.user.id)
+                    exemped_users.splice(index, 1);
+                }
+                writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
             }
 
             return `Restriced ${member.user.globalName}!${addional_info}`;
@@ -104,7 +109,7 @@ const runCommand = (fullCommand) => {
             }
 
             let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-            if (!(exempt_member.user.id in exemped_users)) restricted_users.push(member.user.id);
+            if (!(exempt_member.user.id in exemped_users)) exemped_users.push(member.user.id);
             writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
 
             return `Exempted ${member.user.globalName}!`
