@@ -60,11 +60,12 @@ const runCommand = (fullCommand) => {
 
     switch (command) {
         case "restrict":
-            const user_exists = client.members.cache.has(args[0].replace("<@", "").replace(">", ""))
+            const guild = client.guilds.cache.get(process.env.GUILD_ID)
+            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""))
             if (!user_exists) {
                 return "User no found!";
             }
-            const member = client.members.cache.get(args[0].replace("<@", "").replace(">", ""))
+            const member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""))
             
             restrict(member);
 
