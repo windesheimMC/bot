@@ -2,10 +2,12 @@ import 'dotenv/config'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { readFileSync, writeFileSync } from "node:fs";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]});
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages]});
+let bot_id = 0
 
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    bot_id = readyClient.user.id
     writeFileSync(process.env.RESTRICTED_PATH, "", {flag: "a+"});
     writeFileSync(process.env.EXEMPTED_PATH, "", {flag: "a+"});
 });
@@ -25,7 +27,7 @@ const is_exempt = (member) => {
     return member.user.id in exempted
 }
 
-client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
+client.on(Events.GuildMemberUpdate, (_, newMember) => {
     if (
         (
             hasRole(newMember, process.env.ONLOOKER_ROLE_ID)
@@ -47,6 +49,19 @@ client.on(Events.GuildMemberAdd, (member) => {
     const restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
     if (member.user.id in restricted_users) {
         restrict(member);
+    }
+})
+
+// Listen for commands
+const runCommand = (command) => {
+    console.log("Recieved command: " + command)
+}
+
+client.on(Events.MessageCreate, (content, _) => {
+    const prefix = `<@${bot_id}>`
+
+    if (content.content.startsWith(prefix)) {
+        runCommand(content.content.substring(prefix.length).trim())
     }
 })
 
