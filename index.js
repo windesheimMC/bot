@@ -19,13 +19,19 @@ const restrict = (member) => {
 
 const hasRole = (member, role_id) => member.roles.cache.has(role_id);
 
+const is_exempt = (member) => {
+    return false
+}
+
 client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
     if (
         (
             hasRole(newMember, process.env.ONLOOKER_ROLE_ID)
             || hasRole(newMember, process.env.EX_STUDENT_ROLE_ID)
         )
-        && !hasRole(newMember, process.env.RESTRICTED_ROLE_ID)) 
+        && !hasRole(newMember, process.env.RESTRICTED_ROLE_ID)
+        && !is_exempt(newMember)
+    )
     {
         restrict(newMember);
 
