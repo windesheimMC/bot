@@ -92,6 +92,7 @@ const runCommand = (fullCommand) => {
                     exemped_users.splice(index, 1);
                 }
                 writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
+                addional_info = " They have also been removed from exemption list."
             }
 
             return `Restriced ${member.user.globalName}!${addional_info}`;
