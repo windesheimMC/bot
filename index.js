@@ -9,7 +9,7 @@ client.once(Events.ClientReady, readyClient => {
     writeFileSync(process.env.RESTRICTED_PATH, "", {flag: "a+"});
 });
 
-// Restrict user when they get the onlooker role
+// Restrict user when they get the onlooker or the ex-studebt role
 const restrict = (member) => {
     console.log(`Restricting ${member.user.globalName}`)
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
@@ -17,8 +17,16 @@ const restrict = (member) => {
     member.roles.add(role);
 }
 
-client.on(Events.GuildMemberUpdate, (_, newMember) => {
-    if (newMember.roles.cache.has(process.env.ONLOOKER_ROLE_ID) && !newMember.roles.cache.has(process.env.RESTRICTED_ROLE_ID)) {
+const hasRole = (member, role_id) => member.roles.cache.has(role_id);
+
+client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
+    if (
+        (
+            hasRole(newMember, process.env.ONLOOKER_ROLE_ID)
+            || hasRole(newMember, process.env.EX_STUDENT_ROLE_ID)
+        )
+        && !hasRole(newMember, process.env.RESTRICTED_ROLE_ID)) 
+    {
         restrict(newMember);
 
         let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
