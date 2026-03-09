@@ -53,8 +53,19 @@ client.on(Events.GuildMemberAdd, (member) => {
 })
 
 // Listen for commands
-const runCommand = (command) => {
-    console.log("Recieved command: " + command)
+const runCommand = (fullCommand) => {
+    const args = fullCommand.split(" ")
+    const cammand = parts[0]
+    args.shift()
+
+    switch (command) {
+        case "restrict":
+            // TODO: Restrict user
+            break;
+    
+        default:
+            return "Invalid command!"
+    }
 }
 
 client.on(Events.MessageCreate, (content, _) => {
