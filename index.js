@@ -7,6 +7,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
     writeFileSync(process.env.RESTRICTED_PATH, "", {flag: "a+"});
+    writeFileSync(process.env.EXEMPTED_PATH, "", {flag: "a+"});
 });
 
 // Restrict user when they get the onlooker or the ex-studebt role
@@ -20,7 +21,8 @@ const restrict = (member) => {
 const hasRole = (member, role_id) => member.roles.cache.has(role_id);
 
 const is_exempt = (member) => {
-    return false
+    let exempted = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
+    return member.user.id in exempted
 }
 
 client.on(Events.GuildMemberUpdate, (oldMember, newMember) => {
