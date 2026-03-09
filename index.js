@@ -67,13 +67,17 @@ const runCommand = (fullCommand) => {
             }
             const member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""))
             
+            if (hasRole(member, process.env.RESTRICTED_ROLE_ID)) {
+                return "They are already restricted."
+            }
+
             restrict(member);
 
             let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
             if (!(member.user.id in restricted_users)) restricted_users.push(member.user.id);
             writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
 
-            return `Restriced ${member.user.globalName}`;
+            return `Restriced ${member.user.globalName}!`;
         default:
             return "Invalid command!"
     }
@@ -83,7 +87,8 @@ client.on(Events.MessageCreate, (content, _) => {
     const prefix = `<@${bot_id}>`
 
     if (content.content.startsWith(prefix)) {
-        runCommand(content.content.substring(prefix.length).trim())
+        const reply = runCommand(content.content.substring(prefix.length).trim())
+        content.reply(reply)
     }
 })
 
