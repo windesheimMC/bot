@@ -111,7 +111,7 @@ const runCommand = (fullCommand) => {
             }
 
             let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-            if (!exempt_member.includes(exempt_member.user.id)) exemped_users.push(exempt_member.user.id);
+            if (!exemped_users.includes(exempt_member.user.id)) exemped_users.push(exempt_member.user.id);
             writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
 
             return `Exempted ${exempt_member.user.globalName}!`
