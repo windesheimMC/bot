@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { readFileSync, writeFileSync } from "node:fs";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages]});
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 let bot_id = 0
 
 client.once(Events.ClientReady, readyClient => {
@@ -31,7 +31,7 @@ const hasRole = (member, role_id) => member.roles.cache.has(role_id);
 
 const is_exempt = (member) => {
     let exempted = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-    return member.user.id in exempted
+    return exempted.includes(member.user.id)
 }
 
 client.on(Events.GuildMemberUpdate, (_, newMember) => {
@@ -47,14 +47,14 @@ client.on(Events.GuildMemberUpdate, (_, newMember) => {
         restrict(newMember);
 
         let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
-        if (!(newMember.user.id in restricted_users)) restricted_users.push(newMember.user.id);
+        if (!restricted_users.includes(newMember.user.id)) restricted_users.push(newMember.user.id);
         writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
     }
 });
 
 client.on(Events.GuildMemberAdd, (member) => {
     const restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
-    if (member.user.id in restricted_users) {
+    if (restricted_users.includes(member.user.id)) {
         restrict(member);
     }
 })
@@ -65,10 +65,11 @@ const runCommand = (fullCommand) => {
     const command = args[0]
     args.shift()
 
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
-    const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
     switch (command) {
         case "restrict":
+            const guild = client.guilds.cache.get(process.env.GUILD_ID);
+            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
+
             if (!user_exists) {
                 return "User no found!";
             }
@@ -81,13 +82,13 @@ const runCommand = (fullCommand) => {
             restrict(member);
 
             let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
-            if (!(member.user.id in restricted_users)) restricted_users.push(member.user.id);
+            if (!(restricted_users.includes(member.user.id))) restricted_users.push(member.user.id);
             writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
 
             let addional_info = ""
             if (is_exempt(member)) {
                 let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-                if (exempt_member.user.id in exemped_users) {
+                if (exemped_users.includes(exempt_member.user.id)) {
                     const index = exemped_users.indexOf(exempt_member.user.id)
                     exemped_users.splice(index, 1);
                 }
@@ -98,22 +99,22 @@ const runCommand = (fullCommand) => {
             return `Restriced ${member.user.globalName}!${addional_info}`;
 
         case "exempt":
-            const guild = client.guilds.cache.get(process.env.GUILD_ID)
-            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""))
-            if (!user_exists) {
+            const guildExempt = client.guilds.cache.get(process.env.GUILD_ID)
+            const user_existsExempt = guildExempt.members.cache.has(args[0].replace("<@", "").replace(">", ""))
+            if (!user_existsExempt) {
                 return "User no found!";
             }
-            const exempt_member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""))
+            const exempt_member = guildExempt.members.cache.get(args[0].replace("<@", "").replace(">", ""))
 
             if (hasRole(exempt_member, process.env.RESTRICTED_ROLE_ID)) {
                 unrestrict(exempt_member);
             }
 
             let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-            if (!(exempt_member.user.id in exemped_users)) exemped_users.push(member.user.id);
+            if (!exempt_member.includes(exempt_member.user.id)) exemped_users.push(exempt_member.user.id);
             writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
 
-            return `Exempted ${member.user.globalName}!`
+            return `Exempted ${exempt_member.user.globalName}!`
             
         default:
             return "Invalid command!"
