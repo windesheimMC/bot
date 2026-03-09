@@ -88,8 +88,8 @@ const runCommand = (fullCommand) => {
             let addional_info = ""
             if (is_exempt(member)) {
                 let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-                if (exemped_users.includes(exempt_member.user.id)) {
-                    const index = exemped_users.indexOf(exempt_member.user.id)
+                if (exemped_users.includes(member.user.id)) {
+                    const index = exemped_users.indexOf(member.user.id)
                     exemped_users.splice(index, 1);
                 }
                 writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
