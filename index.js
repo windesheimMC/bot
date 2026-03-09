@@ -55,7 +55,7 @@ client.on(Events.GuildMemberAdd, (member) => {
 // Listen for commands
 const runCommand = (fullCommand) => {
     const args = fullCommand.split(" ")
-    const cammand = parts[0]
+    const command = args[0]
     args.shift()
 
     switch (command) {
