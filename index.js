@@ -2,7 +2,8 @@ import 'dotenv/config'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { readFileSync, writeFileSync } from "node:fs";
 import './util';
-import { RestrictCommand, restrict } from './commands/restrict';
+import { RestrictCommand, restrict, unrestrict } from './commands/restrict';
+import { ExemptCommand, is_exempt } from './commands/exempt';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 let bot_id = 0
@@ -15,17 +16,6 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 // Restrict user when they get the onlooker or the ex-studebt role
-const unrestrict = (member) => {
-    console.log(`Unrestricting ${member.user.globalName}`)
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
-    const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
-    member.roles.remove(role);
-}
-
-const is_exempt = (member) => {
-    let exempted = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-    return exempted.includes(member.user.id)
-}
 
 client.on(Events.GuildMemberUpdate, (_, newMember) => {
     if (
@@ -62,23 +52,7 @@ const runCommand = (fullCommand) => {
         case "restrict":
            RestrictCommand.run(client, args);
         case "exempt":
-            const guildExempt = client.guilds.cache.get(process.env.GUILD_ID)
-            const user_existsExempt = guildExempt.members.cache.has(args[0].replace("<@", "").replace(">", ""))
-            if (!user_existsExempt) {
-                return "User no found!";
-            }
-            const exempt_member = guildExempt.members.cache.get(args[0].replace("<@", "").replace(">", ""))
-
-            if (hasRole(exempt_member, process.env.RESTRICTED_ROLE_ID)) {
-                unrestrict(exempt_member);
-            }
-
-            let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-            if (!exemped_users.includes(exempt_member.user.id)) exemped_users.push(exempt_member.user.id);
-            writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
-
-            return `Exempted ${exempt_member.user.globalName}!`
-            
+           ExemptCommand.run(client, args);
         default:
             return "Invalid command!"
     }

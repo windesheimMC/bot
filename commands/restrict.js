@@ -1,11 +1,19 @@
 import '../command';
 import '../util';
+import { is_exempt } from './exempt';
 
 export const restrict = (member) => {
     console.log(`Restricting ${member.user.globalName}`)
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
     member.roles.add(role);
+}
+
+export const unrestrict = (member) => {
+    console.log(`Unrestricting ${member.user.globalName}`)
+    const guild = client.guilds.cache.get(process.env.GUILD_ID);
+    const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
+    member.roles.remove(role);
 }
 
 export class RestrictCommand extends Command {
