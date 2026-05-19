@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { hasRole } from './util.js';
 import { RestrictCommand, restrict, unrestrict } from './commands/restrict.js';
 import { ExemptCommand, is_exempt } from './commands/exempt.js';
+import { VerifyCommand } from './commands/verify.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 let bot_id = 0
@@ -43,7 +44,7 @@ client.on(Events.GuildMemberAdd, (member) => {
 })
 
 const restrictedCommands = [RestrictCommand, ExemptCommand]
-const publicCommands = []
+const publicCommands = [VerifyCommand]
 
 // Listen for commands
 const runCommand = (fullCommand, commands, author_member) => {
@@ -77,6 +78,9 @@ client.on(Events.MessageCreate, (content, _) => {
         }
 
         const reply = runCommand(content.content.substring(prefix.length).trim(), availableCommands, author_member)
+        if (reply == "dontreply") {
+            return
+        }
         content.reply(reply)
     }
 })
