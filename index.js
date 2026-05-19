@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { readFileSync, writeFileSync } from "node:fs";
+import './util';
+import { RestrictCommand, restrict } from './commands/restrict';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 let bot_id = 0
@@ -13,21 +15,12 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 // Restrict user when they get the onlooker or the ex-studebt role
-const restrict = (member) => {
-    console.log(`Restricting ${member.user.globalName}`)
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
-    const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
-    member.roles.add(role);
-}
-
 const unrestrict = (member) => {
     console.log(`Unrestricting ${member.user.globalName}`)
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
     member.roles.remove(role);
 }
-
-const hasRole = (member, role_id) => member.roles.cache.has(role_id);
 
 const is_exempt = (member) => {
     let exempted = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
@@ -67,37 +60,7 @@ const runCommand = (fullCommand) => {
 
     switch (command) {
         case "restrict":
-            const guild = client.guilds.cache.get(process.env.GUILD_ID);
-            const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
-
-            if (!user_exists) {
-                return "User no found!";
-            }
-            const member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""))
-            
-            if (hasRole(member, process.env.RESTRICTED_ROLE_ID)) {
-                return "They are already restricted."
-            }
-
-            restrict(member);
-
-            let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
-            if (!(restricted_users.includes(member.user.id))) restricted_users.push(member.user.id);
-            writeFileSync(process.env.RESTRICTED_PATH, restricted_users.toString().replace("[","").replace("]",""));
-
-            let addional_info = ""
-            if (is_exempt(member)) {
-                let exemped_users = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
-                if (exemped_users.includes(member.user.id)) {
-                    const index = exemped_users.indexOf(member.user.id)
-                    exemped_users.splice(index, 1);
-                }
-                writeFileSync(process.env.EXEMPTED_PATH, exemped_users.toString().replace("[","").replace("]",""));
-                addional_info = " They have also been removed from exemption list."
-            }
-
-            return `Restriced ${member.user.globalName}!${addional_info}`;
-
+           RestrictCommand.run(client, args);
         case "exempt":
             const guildExempt = client.guilds.cache.get(process.env.GUILD_ID)
             const user_existsExempt = guildExempt.members.cache.has(args[0].replace("<@", "").replace(">", ""))

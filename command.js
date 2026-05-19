@@ -1,7 +1,7 @@
 class Command {
     static name = "command";
 
-    static run(args) {
+    static run(client, args) {
         return "Default command response";
     }
 }
