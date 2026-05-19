@@ -11,7 +11,7 @@ export const is_exempt = (member) => {
 export class ExemptCommand extends Command {
     static name = "exempt";
 
-    static run(client, args) {
+    static run(client, args, author_member) {
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
         const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
 

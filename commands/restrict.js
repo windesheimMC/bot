@@ -20,7 +20,7 @@ export const unrestrict = (member, client) => {
 export class RestrictCommand extends Command {
     static name = "restrict";
 
-    static run(client, args) {
+    static run(client, args, author_member) {
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
         const user_exists = guild.members.cache.has(args[0].replace("<@", "").replace(">", ""));
 

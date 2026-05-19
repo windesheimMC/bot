@@ -46,7 +46,7 @@ const restrictedCommands = [RestrictCommand, ExemptCommand]
 const publicCommands = []
 
 // Listen for commands
-const runCommand = (fullCommand, commands) => {
+const runCommand = (fullCommand, commands, author_member) => {
     const args = fullCommand.split(" ")
     const command = args[0]
     args.shift()
@@ -55,7 +55,7 @@ const runCommand = (fullCommand, commands) => {
 
     commands.forEach(cmd => {
         if (command == cmd.name) {
-            response = cmd.run(client, args);
+            response = cmd.run(client, args, author_member);
         }
     });
 
@@ -76,7 +76,7 @@ client.on(Events.MessageCreate, (content, _) => {
             return
         }
 
-        const reply = runCommand(content.content.substring(prefix.length).trim(), availableCommands)
+        const reply = runCommand(content.content.substring(prefix.length).trim(), availableCommands, author_member)
         content.reply(reply)
     }
 })
