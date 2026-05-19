@@ -42,10 +42,11 @@ client.on(Events.GuildMemberAdd, (member) => {
     }
 })
 
-const commands = [RestrictCommand, ExemptCommand]
+const restrictedCommands = [RestrictCommand, ExemptCommand]
+const publicCommands = []
 
 // Listen for commands
-const runCommand = (fullCommand) => {
+const runCommand = (fullCommand, commands) => {
     const args = fullCommand.split(" ")
     const command = args[0]
     args.shift()
@@ -67,7 +68,12 @@ client.on(Events.MessageCreate, (content, _) => {
     const guild = client.guilds.cache.get(process.env.GUILD_ID)
     const author_member = guild.members.cache.get(content.author.id)
 
-    if (content.content.startsWith(prefix) && hasRole(author_member, process.env.MODERATOR_ROLE_ID)) {
+    if (content.content.startsWith(prefix)) {
+        let availableCommands = publicCommands;
+        if (hasRole(author_member, process.env.MODERATOR_ROLE_ID)) {
+            availableCommands.concat(restrictedCommands);
+        }
+
         const reply = runCommand(content.content.substring(prefix.length).trim())
         content.reply(reply)
     }
