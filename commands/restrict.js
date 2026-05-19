@@ -1,15 +1,16 @@
-import '../command';
-import '../util';
-import { is_exempt } from './exempt';
+import { Command } from '../command.js';
+import { hasRole } from '../util.js';
+import { is_exempt } from './exempt.js';
+import { readFileSync, writeFileSync } from "node:fs";
 
-export const restrict = (member) => {
+export const restrict = (member, client) => {
     console.log(`Restricting ${member.user.globalName}`)
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
     member.roles.add(role);
 }
 
-export const unrestrict = (member) => {
+export const unrestrict = (member, client) => {
     console.log(`Unrestricting ${member.user.globalName}`)
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const role = guild.roles.cache.get(process.env.RESTRICTED_ROLE_ID);
@@ -32,7 +33,7 @@ export class RestrictCommand extends Command {
             return "They are already restricted.";
         }
 
-        restrict(member);
+        restrict(member, client);
 
         this.addToRestrictedFile(member.user.id);
 

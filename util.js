@@ -1,1 +1,1 @@
-const hasRole = (member, role_id) => member.roles.cache.has(role_id);
+export const hasRole = (member, role_id) => member.roles.cache.has(role_id);

@@ -1,4 +1,4 @@
-class Command {
+export class Command {
     static name = "command";
 
     static run(client, args) {

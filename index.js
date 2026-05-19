@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { readFileSync, writeFileSync } from "node:fs";
-import './util';
-import { RestrictCommand, restrict, unrestrict } from './commands/restrict';
-import { ExemptCommand, is_exempt } from './commands/exempt';
+import { hasRole } from './util.js';
+import { RestrictCommand, restrict, unrestrict } from './commands/restrict.js';
+import { ExemptCommand, is_exempt } from './commands/exempt.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 let bot_id = 0
@@ -27,7 +27,7 @@ client.on(Events.GuildMemberUpdate, (_, newMember) => {
         && !is_exempt(newMember)
     )
     {
-        restrict(newMember);
+        restrict(newMember, client);
 
         let restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
         if (!restricted_users.includes(newMember.user.id)) restricted_users.push(newMember.user.id);
@@ -38,7 +38,7 @@ client.on(Events.GuildMemberUpdate, (_, newMember) => {
 client.on(Events.GuildMemberAdd, (member) => {
     const restricted_users = readFileSync(process.env.RESTRICTED_PATH).toString().split(",");
     if (restricted_users.includes(member.user.id)) {
-        restrict(member);
+        restrict(member, client);
     }
 })
 

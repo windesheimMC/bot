@@ -1,6 +1,7 @@
-import '../command';
-import '../util';
-import { unrestrict } from './restrict';
+import { Command } from '../command.js';
+import { hasRole } from '../util.js';
+import { unrestrict } from './restrict.js';
+import { readFileSync, writeFileSync } from "node:fs";
 
 export const is_exempt = (member) => {
     let exempted = readFileSync(process.env.EXEMPTED_PATH).toString().split(",");
@@ -8,7 +9,7 @@ export const is_exempt = (member) => {
 }
 
 export class ExemptCommand extends Command {
-    static name = "restrict";
+    static name = "exempt";
 
     static run(client, args) {
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
@@ -20,12 +21,12 @@ export class ExemptCommand extends Command {
         const member = guild.members.cache.get(args[0].replace("<@", "").replace(">", ""));
 
         if (hasRole(member, process.env.RESTRICTED_ROLE_ID)) {
-            unrestrict(member);
+            unrestrict(member, client);
         }
 
         this.checkAndAddExemption(member.user.id);
 
-        return `Exempted ${exempt_member.user.globalName}!`
+        return `Exempted ${member.user.globalName}!`
     }
 
     static checkAndAddExemption(userId) {
