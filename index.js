@@ -50,13 +50,15 @@ const runCommand = (fullCommand) => {
     const command = args[0]
     args.shift()
 
+    let response = undefined
+
     commands.forEach(cmd => {
         if (command == cmd.name) {
-            return cmd.run(client, args);
+            response = cmd.run(client, args);
         }
     });
 
-    return "Invalid command!"
+    return !!response ? response : "Invalid command!"
 }
 
 client.on(Events.MessageCreate, (content, _) => {
