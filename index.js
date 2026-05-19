@@ -71,10 +71,12 @@ client.on(Events.MessageCreate, (content, _) => {
     if (content.content.startsWith(prefix)) {
         let availableCommands = publicCommands;
         if (hasRole(author_member, process.env.MODERATOR_ROLE_ID)) {
-            availableCommands.concat(restrictedCommands);
+            availableCommands = availableCommands.concat(restrictedCommands);
+        } else if (!process.env.COMMAND_CHANNEL_IDS.split(",").includes(content.channel.id)) {
+            return
         }
 
-        const reply = runCommand(content.content.substring(prefix.length).trim())
+        const reply = runCommand(content.content.substring(prefix.length).trim(), availableCommands)
         content.reply(reply)
     }
 })
