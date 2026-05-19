@@ -42,20 +42,21 @@ client.on(Events.GuildMemberAdd, (member) => {
     }
 })
 
+const commands = [RestrictCommand, ExemptCommand]
+
 // Listen for commands
 const runCommand = (fullCommand) => {
     const args = fullCommand.split(" ")
     const command = args[0]
     args.shift()
 
-    switch (command) {
-        case "restrict":
-           RestrictCommand.run(client, args);
-        case "exempt":
-           ExemptCommand.run(client, args);
-        default:
-            return "Invalid command!"
-    }
+    commands.forEach(cmd => {
+        if (command == cmd.name) {
+            return cmd.run(client, args);
+        }
+    });
+
+    return "Invalid command!"
 }
 
 client.on(Events.MessageCreate, (content, _) => {
